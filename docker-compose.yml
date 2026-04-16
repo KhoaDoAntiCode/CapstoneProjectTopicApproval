@@ -3,11 +3,11 @@ services:
     image: postgres:16-alpine
     container_name: capstone_postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-capstone_registration}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: capstone_registration
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d

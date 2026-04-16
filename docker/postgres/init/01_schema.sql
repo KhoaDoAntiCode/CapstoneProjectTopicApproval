@@ -1,42 +1,28 @@
--- =============================================================================
--- Capstone Project Registration Tool — Initial Schema
--- PostgreSQL 16
--- =============================================================================
 
--- ── Extensions ────────────────────────────────────────────────────────────────
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- ── Users ─────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS users (
-    id          UUID         NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
-    email       VARCHAR(255) NOT NULL,
-    full_name   VARCHAR(255) NOT NULL,
-    avatar_url  VARCHAR(500),
-    role        VARCHAR(20)  NOT NULL CHECK (role IN ('Lecturer', 'Student', 'Admin')),
-    created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    id                 UUID         NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    email              VARCHAR(255) NOT NULL,
+    full_name          VARCHAR(255) NOT NULL,
+    avatar_url         VARCHAR(500),
+    role               VARCHAR(20)  NOT NULL CHECK (role IN ('Lecturer', 'Student', 'Admin')),
+    password_hash      VARCHAR(255) NOT NULL,
+    is_email_verified  BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users (email);
 
--- ── Semesters ─────────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS semesters (
-    id          VARCHAR(20)  NOT NULL PRIMARY KEY,   -- e.g. 'SU26'
-    name        VARCHAR(100) NOT NULL,
-    start_date  DATE         NOT NULL,
-    end_date    DATE         NOT NULL,
-    is_active   BOOLEAN      NOT NULL DEFAULT FALSE
-);
-
--- ── Capstone Projects ─────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS capstone_projects (
     id                          UUID         NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     project_code                VARCHAR(20)  NOT NULL,
-    semester_id                 VARCHAR(20)  NOT NULL REFERENCES semesters (id) ON DELETE RESTRICT,
+    semester_id                 VARCHAR(20)  NOT NULL,
     created_by_id               UUID         NOT NULL REFERENCES users (id) ON DELETE RESTRICT,
     english_name                VARCHAR(500) NOT NULL,
     vietnamese_name             VARCHAR(500) NOT NULL,
-    abbreviation                VARCHAR(20),
+    abbreviation                VARCHAR(255),
     is_research_project         BOOLEAN      NOT NULL DEFAULT FALSE,
     is_enterprise_project       BOOLEAN      NOT NULL DEFAULT FALSE,
     context                     TEXT,
@@ -46,6 +32,19 @@ CREATE TABLE IF NOT EXISTS capstone_projects (
     theory_and_practice         TEXT,
     products                    TEXT,
     proposed_tasks              TEXT,
+    class                       VARCHAR(20),
+    duration_from               DATE,
+    duration_to                 DATE,
+    profession                  VARCHAR(100),
+    specialty                   VARCHAR(10)  CHECK (specialty IN (
+                                               'SE','IA','AI','IS','IoT','GD','JS','AS','IC',
+                                               'DM','IB','HM','TM','LG','FT',
+                                               'MC','PR','EN','JP','KR','CN',
+                                               'EL'
+                                             )),
+    register_kind               VARCHAR(20)  CHECK (register_kind IN ('Lecturer', 'Students')),
+    status                      VARCHAR(20)  NOT NULL DEFAULT 'Pending'
+                                             CHECK (status IN ('Pending', 'Accepted', 'Denied')),
     created_at                  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at                  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
@@ -53,7 +52,6 @@ CREATE TABLE IF NOT EXISTS capstone_projects (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_capstone_projects_project_code ON capstone_projects (project_code);
 CREATE        INDEX IF NOT EXISTS idx_capstone_projects_semester_id  ON capstone_projects (semester_id);
 
--- ── Project Supervisors ───────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS project_supervisors (
     id            UUID         NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     project_id    UUID         NOT NULL REFERENCES capstone_projects (id) ON DELETE CASCADE,
@@ -66,7 +64,6 @@ CREATE TABLE IF NOT EXISTS project_supervisors (
     created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
--- ── Project Students ──────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS project_students (
     id            UUID         NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     project_id    UUID         NOT NULL REFERENCES capstone_projects (id) ON DELETE CASCADE,
@@ -78,3 +75,15 @@ CREATE TABLE IF NOT EXISTS project_students (
     display_order INT          NOT NULL DEFAULT 0,
     created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS project_reviews (
+    id               UUID        NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    project_id       UUID        NOT NULL REFERENCES capstone_projects (id) ON DELETE CASCADE,
+    reviewed_by_id   UUID        NOT NULL REFERENCES users (id) ON DELETE RESTRICT,
+    decision         VARCHAR(20) NOT NULL CHECK (decision IN ('Accepted', 'Denied')),
+    comment          TEXT,
+    reviewed_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_project_reviews_project_id     ON project_reviews (project_id);
+CREATE INDEX IF NOT EXISTS idx_project_reviews_reviewed_by_id ON project_reviews (reviewed_by_id);
