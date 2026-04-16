@@ -1,22 +1,18 @@
 using System.Reflection;
-using CapstoneRegistration.API.Data;
-using Microsoft.EntityFrameworkCore;
+using CapstoneRegistration.API.Extensions;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Database ──────────────────────────────────────────────────────────────────
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is missing.");
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
-
-// ── Web API ───────────────────────────────────────────────────────────────────
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// ── Swagger ───────────────────────────────────────────────────────────────────
+builder.Services.AddApplicationServices(builder.Configuration);
+
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
+builder.Services.AddCorsPolicy(builder.Configuration);
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -32,7 +28,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // JWT Bearer auth button in Swagger UI
     var jwtScheme = new OpenApiSecurityScheme
     {
         Name         = "Authorization",
@@ -60,7 +55,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // Include XML comments from controllers/models
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -69,7 +63,8 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// ── Middleware ────────────────────────────────────────────────────────────────
+app.UseExceptionHandling();
+
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
@@ -79,6 +74,8 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseHttpsRedirection();
+app.UseCors("DefaultCors");
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
