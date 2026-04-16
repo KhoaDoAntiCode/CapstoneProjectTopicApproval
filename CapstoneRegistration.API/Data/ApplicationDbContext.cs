@@ -9,16 +9,15 @@ public class ApplicationDbContext : DbContext
         : base(options) { }
 
     public DbSet<User> Users => Set<User>();
-    public DbSet<Semester> Semesters => Set<Semester>();
     public DbSet<CapstoneProject> CapstoneProjects => Set<CapstoneProject>();
     public DbSet<ProjectSupervisor> ProjectSupervisors => Set<ProjectSupervisor>();
     public DbSet<ProjectStudent> ProjectStudents => Set<ProjectStudent>();
+    public DbSet<ProjectReview> ProjectReviews => Set<ProjectReview>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // User
         modelBuilder.Entity<User>(e =>
         {
             e.HasIndex(u => u.Email)
@@ -26,13 +25,6 @@ public class ApplicationDbContext : DbContext
                 .IsUnique();
         });
 
-        // Semester — string PK, no auto-generate
-        modelBuilder.Entity<Semester>(e =>
-        {
-            e.Property(s => s.Id).ValueGeneratedNever();
-        });
-
-        // CapstoneProject
         modelBuilder.Entity<CapstoneProject>(e =>
         {
             e.HasIndex(p => p.ProjectCode)
@@ -42,18 +34,12 @@ public class ApplicationDbContext : DbContext
             e.HasIndex(p => p.SemesterId)
                 .HasDatabaseName("idx_capstone_projects_semester_id");
 
-            e.HasOne(p => p.Semester)
-                .WithMany(s => s.CapstoneProjects)
-                .HasForeignKey(p => p.SemesterId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             e.HasOne(p => p.CreatedBy)
                 .WithMany(u => u.CreatedProjects)
                 .HasForeignKey(p => p.CreatedById)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // ProjectSupervisor — cascade delete when project is deleted
         modelBuilder.Entity<ProjectSupervisor>(e =>
         {
             e.HasOne(ps => ps.Project)
@@ -62,13 +48,31 @@ public class ApplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // ProjectStudent — cascade delete when project is deleted
         modelBuilder.Entity<ProjectStudent>(e =>
         {
             e.HasOne(ps => ps.Project)
                 .WithMany(p => p.Students)
                 .HasForeignKey(ps => ps.ProjectId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ProjectReview>(e =>
+        {
+            e.HasIndex(r => r.ProjectId)
+                .HasDatabaseName("idx_project_reviews_project_id");
+
+            e.HasIndex(r => r.ReviewedById)
+                .HasDatabaseName("idx_project_reviews_reviewed_by_id");
+
+            e.HasOne(r => r.Project)
+                .WithMany(p => p.ProjectReviews)
+                .HasForeignKey(r => r.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(r => r.ReviewedBy)
+                .WithMany(u => u.Reviews)
+                .HasForeignKey(r => r.ReviewedById)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

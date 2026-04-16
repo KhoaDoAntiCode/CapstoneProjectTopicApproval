@@ -33,7 +33,7 @@ public class ProjectStudent
 
     [Column("role_in_group")]
     [MaxLength(10)]
-    public string? RoleInGroup { get; set; } // Leader | Member
+    public string? RoleInGroup { get; set; }
 
     [Column("display_order")]
     public int DisplayOrder { get; set; } = 0;
@@ -41,7 +41,6 @@ public class ProjectStudent
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation
     [ForeignKey(nameof(ProjectId))]
     public CapstoneProject Project { get; set; } = null!;
 }

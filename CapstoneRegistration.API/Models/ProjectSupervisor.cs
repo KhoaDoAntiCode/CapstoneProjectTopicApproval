@@ -40,7 +40,6 @@ public class ProjectSupervisor
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation
     [ForeignKey(nameof(ProjectId))]
     public CapstoneProject Project { get; set; } = null!;
 }

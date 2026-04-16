@@ -13,7 +13,7 @@ public class CapstoneProject
     [Required]
     [Column("project_code")]
     [MaxLength(20)]
-    public string ProjectCode { get; set; } = null!; // e.g. "SU26SE001"
+    public string ProjectCode { get; set; } = null!;
 
     [Required]
     [Column("semester_id")]
@@ -35,7 +35,7 @@ public class CapstoneProject
     public string VietnameseName { get; set; } = null!;
 
     [Column("abbreviation")]
-    [MaxLength(20)]
+    [MaxLength(255)]
     public string? Abbreviation { get; set; }
 
     [Column("is_research_project")]
@@ -65,19 +65,43 @@ public class CapstoneProject
     [Column("proposed_tasks")]
     public string? ProposedTasks { get; set; }
 
+    [Column("class")]
+    [MaxLength(20)]
+    public string? ClassName { get; set; }
+
+    [Column("duration_from")]
+    public DateOnly? DurationFrom { get; set; }
+
+    [Column("duration_to")]
+    public DateOnly? DurationTo { get; set; }
+
+    [Column("profession")]
+    [MaxLength(100)]
+    public string? Profession { get; set; }
+
+    [Column("specialty")]
+    [MaxLength(10)]
+    public string? Specialty { get; set; }
+
+    [Column("register_kind")]
+    [MaxLength(20)]
+    public string? RegisterKind { get; set; }
+
+    [Required]
+    [Column("status")]
+    [MaxLength(20)]
+    public string Status { get; set; } = "Pending";
+
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [Column("updated_at")]
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation
-    [ForeignKey(nameof(SemesterId))]
-    public Semester Semester { get; set; } = null!;
-
     [ForeignKey(nameof(CreatedById))]
     public User CreatedBy { get; set; } = null!;
 
     public ICollection<ProjectSupervisor> Supervisors { get; set; } = new List<ProjectSupervisor>();
     public ICollection<ProjectStudent> Students { get; set; } = new List<ProjectStudent>();
+    public ICollection<ProjectReview> ProjectReviews { get; set; } = new List<ProjectReview>();
 }
