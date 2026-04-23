@@ -23,11 +23,13 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ICapstoneProjectRepository, CapstoneProjectRepository>();
         services.AddScoped<IProjectReviewRepository, ProjectReviewRepository>();
+        services.AddScoped<IInstructorRepository, InstructorRepository>();
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IDocxParserService, DocxParserService>();
         services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<IReviewService, ReviewService>();
+        services.AddScoped<IInstructorService, InstructorService>();
 
         return services;
     }

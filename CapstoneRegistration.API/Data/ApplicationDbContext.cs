@@ -9,6 +9,7 @@ public class ApplicationDbContext : DbContext
         : base(options) { }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<Instructor> Instructors => Set<Instructor>();
     public DbSet<CapstoneProject> CapstoneProjects => Set<CapstoneProject>();
     public DbSet<ProjectSupervisor> ProjectSupervisors => Set<ProjectSupervisor>();
     public DbSet<ProjectStudent> ProjectStudents => Set<ProjectStudent>();
@@ -22,6 +23,13 @@ public class ApplicationDbContext : DbContext
         {
             e.HasIndex(u => u.Email)
                 .HasDatabaseName("idx_users_email")
+                .IsUnique();
+        });
+
+        modelBuilder.Entity<Instructor>(e =>
+        {
+            e.HasIndex(i => i.Email)
+                .HasDatabaseName("idx_instructors_email")
                 .IsUnique();
         });
 
