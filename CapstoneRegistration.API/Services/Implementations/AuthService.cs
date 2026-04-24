@@ -25,11 +25,6 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
     {
-        var allowedDomain = _config["AllowedEmailDomain"] ?? "fpt.edu.vn";
-        var domain = request.Email.Split('@').LastOrDefault() ?? string.Empty;
-        if (!string.Equals(domain, allowedDomain, StringComparison.OrdinalIgnoreCase))
-            throw new BadRequestException($"Only @{allowedDomain} email addresses are allowed.");
-
         var exists = await _db.Users.AnyAsync(u => u.Email == request.Email.ToLower(), ct);
         if (exists)
             throw new BadRequestException("An account with this email already exists.");
@@ -38,8 +33,8 @@ public class AuthService : IAuthService
         {
             Email           = request.Email.ToLower(),
             FullName        = request.FullName,
-            Role            = "Lecturer",
-            PasswordHash    = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            Role            = "Admin",
+            Password        = request.Password,
             IsEmailVerified = false
         };
 
@@ -54,7 +49,7 @@ public class AuthService : IAuthService
         var user = await _db.Users
             .FirstOrDefaultAsync(u => u.Email == request.Email.ToLower(), ct);
 
-        if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        if (user is null || !string.Equals(request.Password, user.Password, StringComparison.Ordinal))
             throw new UnauthorizedException("Invalid email or password.");
 
         return BuildAuthResponse(user);

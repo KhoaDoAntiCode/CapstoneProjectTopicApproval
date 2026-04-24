@@ -10,7 +10,7 @@ namespace CapstoneRegistration.API.Controllers;
 
 [ApiController]
 [Route("api/projects")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class ProjectController : ControllerBase
 {
     private readonly IProjectService _projectService;
@@ -45,6 +45,26 @@ public class ProjectController : ControllerBase
             ApiResponse<object>.Ok(result, "Project submitted successfully."));
     }
 
+    [HttpPost("create-with-docx")]
+    public async Task<IActionResult> CreateWithDocx(
+        [FromBody] SubmitProjectRequest request,
+        CancellationToken ct)
+    {
+        var userId = GetCurrentUserId();
+        var file = await _projectService.CreateWithDocxAsync(userId, request, ct);
+        return File(file.Content, file.ContentType, file.FileName);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(
+        Guid id,
+        [FromBody] SubmitProjectRequest request,
+        CancellationToken ct)
+    {
+        var result = await _projectService.UpdateAsync(id, request, ct);
+        return Ok(ApiResponse<object>.Ok(result, "Project updated successfully."));
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
@@ -66,6 +86,27 @@ public class ProjectController : ControllerBase
     {
         var result = await _projectService.GetByIdAsync(id, ct);
         return Ok(ApiResponse<object>.Ok(result));
+    }
+
+    [HttpGet("{id:guid}/docx")]
+    public async Task<IActionResult> DownloadDocx(Guid id, CancellationToken ct)
+    {
+        var file = await _projectService.GenerateDocxAsync(id, ct);
+        return File(file.Content, file.ContentType, file.FileName);
+    }
+
+    [HttpPost("{id:guid}/regenerate-docx")]
+    public async Task<IActionResult> RegenerateDocx(Guid id, CancellationToken ct)
+    {
+        var file = await _projectService.GenerateDocxAsync(id, ct);
+        return File(file.Content, file.ContentType, file.FileName);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        await _projectService.DeleteAsync(id, ct);
+        return Ok(ApiResponse<object>.Ok(new { Id = id }, "Project deleted successfully."));
     }
 
     private Guid GetCurrentUserId()

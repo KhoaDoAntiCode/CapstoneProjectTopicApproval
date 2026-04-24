@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capstone Topic Control Room</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="shell">
+        <aside class="sidebar">
+            <div>
+                <p class="eyebrow">Admin-only workspace</p>
+                <h1>Capstone Topic Control Room</h1>
+                <p class="sidebar-copy">
+                    A focused dashboard for turning draft topic data into consistent registrations and reusable DOCX output.
+                </p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-link active" data-screen="overview">Overview</button>
+                <button class="nav-link" data-screen="create">Create Topic</button>
+                <button class="nav-link" data-screen="topics">Topic List</button>
+                <button class="nav-link action-link" data-action="edit-selected">Update Topic</button>
+                <button class="nav-link action-link" data-action="regenerate-selected">Recreate DOCX</button>
+            </nav>
+
+            <section class="login-card">
+                <div class="login-card-header">
+                    <div>
+                        <p class="eyebrow">Session</p>
+                        <h2 id="sessionTitle">Admin Login</h2>
+                    </div>
+                    <span id="authBadge" class="status-pill muted">offline</span>
+                </div>
+
+                <form id="loginForm" class="stack compact">
+                    <label>
+                        <span>Email</span>
+                        <input id="emailInput" type="email" placeholder="admin@local.demo" required>
+                    </label>
+                    <label>
+                        <span>Password</span>
+                        <input id="passwordInput" type="password" placeholder="Enter password" required>
+                    </label>
+                    <button type="submit" class="primary-button">Sign In</button>
+                </form>
+
+                <div id="sessionInfo" class="session-info hidden">
+                    <p id="sessionUser"></p>
+                    <p id="sessionMeta" class="muted-text"></p>
+                    <button id="logoutButton" type="button" class="ghost-button">Sign Out</button>
+                </div>
+            </section>
+        </aside>
+
+        <main class="main-panel">
+            <header class="hero">
+                <div>
+                    <p class="eyebrow">Based on your demo flow</p>
+                    <h2>Build, review, and reuse capstone submission data from one place.</h2>
+                </div>
+                <div class="hero-actions">
+                    <button id="loadProjectsButton" class="ghost-button" type="button">Refresh Topic List</button>
+                    <button id="fillSampleButton" class="primary-button" type="button">Load Demo Data</button>
+                </div>
+            </header>
+
+            <section id="overviewScreen" class="screen active">
+                <div class="stats-grid">
+                    <article class="stat-card">
+                        <p class="stat-label">Live workflow</p>
+                        <h3>Admin Dashboard</h3>
+                        <p>Create a submission, import DOCX content, and review topic records in one interface.</p>
+                    </article>
+                    <article class="stat-card accent">
+                        <p class="stat-label">Form structure</p>
+                        <h3>Mirrors your sample</h3>
+                        <p>Supervisor block, student table, topic titles, context, requirements, products, and tasks.</p>
+                    </article>
+                    <article class="stat-card">
+                        <p class="stat-label">Connected now</p>
+                        <h3>Real API endpoints</h3>
+                        <p>Login, parse DOCX, submit project, list projects, view details, and review history.</p>
+                    </article>
+                </div>
+
+                <div class="overview-layout">
+                    <section class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="eyebrow">Flow</p>
+                                <h3>How the admin works</h3>
+                            </div>
+                        </div>
+                        <ol class="timeline">
+                            <li>Sign in as admin.</li>
+                            <li>Import an existing `.docx` or type the form manually.</li>
+                            <li>Add supervisor and student group members.</li>
+                            <li>Submit the topic and keep reviewing the topic list.</li>
+                            <li>Open a topic again to inspect details and review history.</li>
+                        </ol>
+                    </section>
+
+                    <section class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="eyebrow">Demo status</p>
+                                <h3>Frontend notes</h3>
+                            </div>
+                        </div>
+                        <ul class="feature-list">
+                            <li>Designed for a single admin user, matching your project idea.</li>
+                            <li>The form layout is more polished than the sample while keeping the same data structure.</li>
+                            <li>The left nav now exposes create topic, topic list, update topic, and recreate DOCX actions.</li>
+                            <li>The page stays usable on laptop and mobile widths.</li>
+                        </ul>
+                    </section>
+                </div>
+            </section>
+
+            <section id="createScreen" class="screen">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <p class="eyebrow">Import</p>
+                            <h3>Upload existing DOCX to prefill</h3>
+                        </div>
+                        <p class="muted-text">Uses `POST /api/projects/parse`.</p>
+                    </div>
+                    <form id="parseForm" class="parse-form">
+                        <input id="docxFileInput" type="file" accept=".docx">
+                        <button type="submit" class="ghost-button">Parse DOCX</button>
+                    </form>
+                </div>
+
+                <form id="projectForm" class="form-grid">
+                    <section class="panel wide">
+                        <div class="panel-header">
+                            <div>
+                                <p class="eyebrow">Section 1</p>
+                                <h3>Registration Basics</h3>
+                            </div>
+                            <span class="status-pill warm">required</span>
+                        </div>
+
+                        <div class="field-grid three">
+                            <label>
+                                <span>Semester ID</span>
+                                <input name="semesterId" placeholder="SP26" required>
+                            </label>
+                            <label>
+                                <span>Class</span>
+                                <input name="className" placeholder="SE1848">
+                            </label>
+                            <label>
+                                <span>Register Kind</span>
+                                <select name="registerKind">
+                                    <option value="">Select kind</option>
+                                    <option value="Students">Students</option>
+                                    <option value="Lecturer">Lecturer</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <div class="field-grid four">
+                            <label>
+                                <span>Duration From</span>
+                                <input name="durationFrom" type="date">
+                            </label>
+                            <label>
+                                <span>Duration To</span>
+                                <input name="durationTo" type="date">
+                            </label>
+                            <label>
+                                <span>Profession</span>
+                                <input name="profession" placeholder="Software Engineer">
+                            </label>
+                            <label>
+                                <span>Specialty</span>
+                                <input name="specialty" placeholder="SE">
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="panel wide">
+                        <div class="panel-header">
+                            <div>
+                                <p class="eyebrow">Section 2</p>
+                                <h3>Capstone Topic Identity</h3>
+                            </div>
+                        </div>
+
+                        <div class="field-grid">
+                            <label>
+                                <span>English Name</span>
+                                <input name="englishName" placeholder="AI-Powered Educational Plush Toy Store" required>
+                            </label>
+                            <label>
+                                <span>Vietnamese Name</span>
+                                <input name="vietnameseName" placeholder="Cửa Hàng Gấu Bông Học Tập Tích Hợp AI" required>
+                            </label>
+                            <label>
+                                <span>Abbreviation</span>
+                                <input name="abbreviation" placeholder="AIEPTS">
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="eyebrow">Section 3</p>
+                                <h3>Supervisor</h3>
+                            </div>
+                            <button id="addSupervisorButton" class="ghost-button small" type="button">Add Supervisor</button>
+                        </div>
+                        <div id="supervisorsContainer" class="dynamic-list"></div>
+                    </section>
+
+                    <section class="panel">
+                        <div class="panel-header">
+                            <div>
+                                <p class="eyebrow">Section 4</p>
+                                <h3>Students</h3>
+                            </div>
+                            <button id="addStudentButton" class="ghost-button small" type="button">Add Student</button>
+                        </div>
+                        <div id="studentsContainer" class="dynamic-list"></div>
+                    </section>
+
+                    <section class="panel wide">
+                        <div class="panel-header">
+                            <div>
+                                <p class="eyebrow">Section 5</p>
+                                <h3>Capstone Content</h3>
+                            </div>
+                        </div>
+
+                        <div class="field-grid">
+                            <label class="full">
+                                <span>Context</span>
+                                <textarea name="context" rows="5" placeholder="Business context, market need, and project background"></textarea>
+                            </label>
+                            <label class="full">
+                                <span>Proposed Solutions</span>
+                                <textarea name="proposedSolutions" rows="4" placeholder="How the team plans to solve the problem"></textarea>
+                            </label>
+                            <label class="full">
+                                <span>Functional Requirements</span>
+                                <textarea name="functionalRequirements" rows="5" placeholder="Main system functions"></textarea>
+                            </label>
+                            <label class="full">
+                                <span>Non-functional Requirements</span>
+                                <textarea name="nonFunctionalRequirements" rows="4" placeholder="Security, scalability, responsiveness, availability"></textarea>
+                            </label>
+                            <label class="full">
+                                <span>Theory and Practice</span>
+                                <textarea name="theoryAndPractice" rows="4" placeholder="Main proposal content, result, and product"></textarea>
+                            </label>
+                            <label class="full">
+                                <span>Products</span>
+                                <textarea name="products" rows="4" placeholder="Expected deliverables"></textarea>
+                            </label>
+                            <label class="full">
+                                <span>Proposed Tasks</span>
+                                <textarea name="proposedTasks" rows="4" placeholder="Task breakdown for the team"></textarea>
+                            </label>
+                        </div>
+                    </section>
+
+                    <div class="form-actions">
+                        <button type="submit" class="primary-button">Send Info & Create DOCX</button>
+                        <button id="clearFormButton" type="button" class="ghost-button">Reset Form</button>
+                    </div>
+                </form>
+            </section>
+
+            <section id="topicsScreen" class="screen">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <p class="eyebrow">Topics</p>
+                            <h3>Created Topic List</h3>
+                        </div>
+                        <div class="search-wrap">
+                            <input id="searchInput" type="search" placeholder="Search by name or semester">
+                            <button id="searchButton" class="ghost-button" type="button">Search</button>
+                        </div>
+                    </div>
+
+                    <div id="projectList" class="project-list"></div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <p class="eyebrow">Details</p>
+                            <h3>Selected Topic</h3>
+                        </div>
+                        <div class="hero-actions">
+                            <button id="reloadDetailButton" class="ghost-button small" type="button">Reload</button>
+                            <button id="editProjectButton" class="ghost-button small" type="button">Update Topic</button>
+                            <button id="deleteProjectButton" class="ghost-button small" type="button">Delete Topic</button>
+                            <button id="regenerateDocxButton" class="primary-button small" type="button">Create DOCX Again</button>
+                        </div>
+                    </div>
+                    <div id="projectDetail" class="detail-empty">
+                        Select a topic from the list to inspect full submission data.
+                    </div>
+                </div>
+            </section>
+
+            <div id="toast" class="toast hidden"></div>
+        </main>
+    </div>
+
+    <template id="supervisorTemplate">
+        <article class="dynamic-card">
+            <div class="field-grid four">
+                <label>
+                    <span>Full Name</span>
+                    <input data-field="fullName" placeholder="Lecturer name">
+                </label>
+                <label>
+                    <span>Phone</span>
+                    <input data-field="phone" placeholder="Phone number">
+                </label>
+                <label>
+                    <span>Email</span>
+                    <input data-field="email" type="email" placeholder="lecturer@fpt.edu.vn">
+                </label>
+                <label>
+                    <span>Title</span>
+                    <input data-field="title" placeholder="Mr., Ms., Dr.">
+                </label>
+            </div>
+            <div class="dynamic-footer">
+                <label class="check-line">
+                    <input data-field="isPrimary" type="checkbox">
+                    <span>Primary supervisor</span>
+                </label>
+                <button type="button" class="ghost-button small remove-row">Remove</button>
+            </div>
+        </article>
+    </template>
+
+    <template id="studentTemplate">
+        <article class="dynamic-card">
+            <div class="field-grid four">
+                <label>
+                    <span>Full Name</span>
+                    <input data-field="fullName" placeholder="Student name">
+                </label>
+                <label>
+                    <span>Student Code</span>
+                    <input data-field="studentCode" placeholder="SE18xxxx">
+                </label>
+                <label>
+                    <span>Phone</span>
+                    <input data-field="phone" placeholder="Phone number">
+                </label>
+                <label>
+                    <span>Email</span>
+                    <input data-field="email" type="email" placeholder="student@fpt.edu.vn">
+                </label>
+            </div>
+            <div class="dynamic-footer">
+                <label>
+                    <span>Role in Group</span>
+                    <select data-field="roleInGroup">
+                        <option value="Member">Member</option>
+                        <option value="Leader">Leader</option>
+                    </select>
+                </label>
+                <button type="button" class="ghost-button small remove-row">Remove</button>
+            </div>
+        </article>
+    </template>
+
+    <script src="/app.js"></script>
+</body>
+</html>

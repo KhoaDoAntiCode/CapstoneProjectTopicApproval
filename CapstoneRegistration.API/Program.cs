@@ -1,4 +1,5 @@
 using System.Reflection;
+using CapstoneRegistration.API.Data;
 using CapstoneRegistration.API.Extensions;
 using Microsoft.OpenApi.Models;
 
@@ -63,6 +64,8 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+await DemoDatabaseInitializer.InitializeAsync(app.Services);
+
 app.UseExceptionHandling();
 
 app.UseSwagger();
@@ -73,10 +76,13 @@ app.UseSwaggerUI(options =>
     options.DocumentTitle = "Capstone Project Registration Tool";
 });
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseCors("DefaultCors");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 app.Run();

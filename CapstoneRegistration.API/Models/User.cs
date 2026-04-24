@@ -30,9 +30,9 @@ public class User
     public string Role { get; set; } = null!;
 
     [Required]
-    [Column("password_hash")]
+    [Column("password")]
     [MaxLength(255)]
-    public string PasswordHash { get; set; } = null!;
+    public string Password { get; set; } = null!;
 
     [Column("is_email_verified")]
     public bool IsEmailVerified { get; set; } = false;

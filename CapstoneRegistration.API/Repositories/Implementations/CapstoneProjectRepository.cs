@@ -67,4 +67,15 @@ public class CapstoneProjectRepository : ICapstoneProjectRepository
         await _db.SaveChangesAsync(ct);
         return project;
     }
+
+    public async Task UpdateAsync(CapstoneProject project, CancellationToken ct = default)
+    {
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task DeleteAsync(CapstoneProject project, CancellationToken ct = default)
+    {
+        _db.CapstoneProjects.Remove(project);
+        await _db.SaveChangesAsync(ct);
+    }
 }

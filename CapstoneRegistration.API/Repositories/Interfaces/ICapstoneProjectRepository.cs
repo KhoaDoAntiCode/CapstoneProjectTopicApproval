@@ -14,4 +14,6 @@ public interface ICapstoneProjectRepository
         CancellationToken ct = default);
     Task<string> GenerateProjectCodeAsync(string semesterId, CancellationToken ct = default);
     Task<CapstoneProject> AddAsync(CapstoneProject project, CancellationToken ct = default);
+    Task UpdateAsync(CapstoneProject project, CancellationToken ct = default);
+    Task DeleteAsync(CapstoneProject project, CancellationToken ct = default);
 }

@@ -10,7 +10,7 @@ namespace CapstoneRegistration.API.Controllers;
 
 [ApiController]
 [Route("api/projects/{projectId:guid}/reviews")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class ReviewController : ControllerBase
 {
     private readonly IReviewService _reviewService;

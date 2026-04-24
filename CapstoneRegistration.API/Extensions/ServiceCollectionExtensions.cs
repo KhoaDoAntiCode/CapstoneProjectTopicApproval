@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped(typeof(IBaseRepository<,>), typeof(BaseRepository<,>));
         services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IDocxParserService, DocxParserService>();
+        services.AddScoped<IProjectDocumentService, ProjectDocumentService>();
         services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<IReviewService, ReviewService>();
 
