@@ -3,16 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CapstoneRegistration.API.Models;
 
-[Table("project_supervisors")]
+[Table("instructors")]
 public class ProjectSupervisor
 {
     [Key]
     [Column("id")]
     public Guid Id { get; set; } = Guid.NewGuid();
-
-    [Required]
-    [Column("project_id")]
-    public Guid ProjectId { get; set; }
 
     [Required]
     [Column("full_name")]
@@ -31,15 +27,22 @@ public class ProjectSupervisor
     [MaxLength(100)]
     public string? Title { get; set; }
 
-    [Column("is_primary")]
-    public bool IsPrimary { get; set; } = false;
+    [Column("department")]
+    [MaxLength(150)]
+    public string? Department { get; set; }
 
-    [Column("display_order")]
-    public int DisplayOrder { get; set; } = 0;
+    [Column("active")]
+    public bool Active { get; set; } = true;
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    [ForeignKey(nameof(ProjectId))]
-    public CapstoneProject Project { get; set; } = null!;
+    [Column("updated_at")]
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    [NotMapped]
+    public bool IsPrimary { get; set; } = true;
+
+    [NotMapped]
+    public int DisplayOrder { get; set; } = 1;
 }

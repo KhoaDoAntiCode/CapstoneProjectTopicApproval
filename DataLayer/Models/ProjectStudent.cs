@@ -3,16 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CapstoneRegistration.API.Models;
 
-[Table("project_students")]
+[Table("students")]
 public class ProjectStudent
 {
     [Key]
     [Column("id")]
     public Guid Id { get; set; } = Guid.NewGuid();
-
-    [Required]
-    [Column("project_id")]
-    public Guid ProjectId { get; set; }
 
     [Required]
     [Column("full_name")]
@@ -31,16 +27,27 @@ public class ProjectStudent
     [MaxLength(255)]
     public string? Email { get; set; }
 
-    [Column("role_in_group")]
-    [MaxLength(10)]
-    public string? RoleInGroup { get; set; }
+    [Column("major")]
+    [MaxLength(100)]
+    public string? Major { get; set; }
 
-    [Column("display_order")]
-    public int DisplayOrder { get; set; } = 0;
+    [Column("specialty")]
+    [MaxLength(50)]
+    public string? Specialty { get; set; }
+
+    [Column("active")]
+    public bool Active { get; set; } = true;
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    [ForeignKey(nameof(ProjectId))]
-    public CapstoneProject Project { get; set; } = null!;
+    [Column("updated_at")]
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    [NotMapped]
+    [MaxLength(20)]
+    public string? RoleInGroup { get; set; }
+
+    [NotMapped]
+    public int DisplayOrder { get; set; } = 0;
 }

@@ -13,10 +13,10 @@ public class CapstoneProjectRepository : ICapstoneProjectRepository
 
     public async Task<CapstoneProject?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default) =>
         await _db.CapstoneProjects
-            .Include(p => p.Supervisors.OrderBy(s => s.DisplayOrder))
-            .Include(p => p.Students.OrderBy(s => s.DisplayOrder))
-            .Include(p => p.ProjectReviews.OrderBy(r => r.ReviewedAt))
-                .ThenInclude(r => r.ReviewedBy)
+            .Include(p => p.Supervisor)
+            .Include(p => p.Group)
+                .ThenInclude(g => g.Members.OrderBy(m => m.DisplayOrder))
+                    .ThenInclude(m => m.Student)
             .Include(p => p.CreatedBy)
             .FirstOrDefaultAsync(p => p.Id == id, ct);
 
@@ -28,11 +28,12 @@ public class CapstoneProjectRepository : ICapstoneProjectRepository
         CancellationToken ct = default)
     {
         var query = _db.CapstoneProjects
+            .Include(p => p.Group)
             .Include(p => p.CreatedBy)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(semesterId))
-            query = query.Where(p => p.SemesterId == semesterId);
+            query = query.Where(p => p.ProjectCode.StartsWith(semesterId));
 
         if (!string.IsNullOrWhiteSpace(status))
             query = query.Where(p => p.Status == status);
@@ -57,25 +58,24 @@ public class CapstoneProjectRepository : ICapstoneProjectRepository
     public async Task<string> GenerateProjectCodeAsync(string semesterId, CancellationToken ct = default)
     {
         var count = await _db.CapstoneProjects
-            .CountAsync(p => p.SemesterId == semesterId, ct);
+            .CountAsync(p => p.ProjectCode.StartsWith(semesterId), ct);
         return $"{semesterId}{(count + 1):D3}";
     }
 
-    public async Task<CapstoneProject> AddAsync(CapstoneProject project, CancellationToken ct = default)
+    public Task<CapstoneProject> AddAsync(CapstoneProject project, CancellationToken ct = default)
     {
         _db.CapstoneProjects.Add(project);
-        await _db.SaveChangesAsync(ct);
-        return project;
+        return Task.FromResult(project);
     }
 
-    public async Task UpdateAsync(CapstoneProject project, CancellationToken ct = default)
+    public Task UpdateAsync(CapstoneProject project, CancellationToken ct = default)
     {
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(CapstoneProject project, CancellationToken ct = default)
+    public Task DeleteAsync(CapstoneProject project, CancellationToken ct = default)
     {
         _db.CapstoneProjects.Remove(project);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 }

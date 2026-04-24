@@ -2,9 +2,11 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using CapstoneRegistration.API.Data;
+using CapstoneRegistration.API.Repositories.Implementations;
 using CapstoneRegistration.API.Repositories.Interfaces;
-using CapstoneRegistration.API.Repositories.Implementations;using CapstoneRegistration.API.Services.Interfaces;
+using CapstoneRegistration.API.Services.Interfaces;
 using CapstoneRegistration.API.Services.Implementations;
+using CapstoneRegistration.API.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
 
 namespace CapstoneRegistration.API.Extensions;
@@ -23,6 +25,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ICapstoneProjectRepository, CapstoneProjectRepository>();
         services.AddScoped<IProjectReviewRepository, ProjectReviewRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IDocxParserService, DocxParserService>();

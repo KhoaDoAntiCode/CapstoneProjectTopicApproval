@@ -18,10 +18,9 @@ public class ProjectReviewRepository : IProjectReviewRepository
             .OrderByDescending(r => r.ReviewedAt)
             .ToListAsync(ct);
 
-    public async Task<ProjectReview> AddAsync(ProjectReview review, CancellationToken ct = default)
+    public Task<ProjectReview> AddAsync(ProjectReview review, CancellationToken ct = default)
     {
         _db.ProjectReviews.Add(review);
-        await _db.SaveChangesAsync(ct);
-        return review;
+        return Task.FromResult(review);
     }
 }

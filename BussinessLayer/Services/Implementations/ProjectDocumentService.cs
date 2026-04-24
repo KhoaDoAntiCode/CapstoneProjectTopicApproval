@@ -35,11 +35,11 @@ public class ProjectDocumentService : IProjectDocumentService
 
             AddSpacer(body);
             AddParagraph(body, "1. Register information for supervisor (if have)", bold: true, fontSize: "26");
-            body.Append(BuildSupervisorTable(project.Supervisors.OrderBy(x => x.DisplayOrder).ToList()));
+            body.Append(BuildSupervisorTable(project.Supervisor is null ? [] : [project.Supervisor]));
 
             AddSpacer(body);
             AddParagraph(body, "2. Register information for students (if have)", bold: true, fontSize: "26");
-            body.Append(BuildStudentTable(project.Students.OrderBy(x => x.DisplayOrder).ToList()));
+            body.Append(BuildStudentTable(project.Group?.Members.OrderBy(x => x.DisplayOrder).ToList() ?? []));
 
             AddSpacer(body);
             AddParagraph(body, "3. Register content of Capstone Project", bold: true, fontSize: "26");
@@ -110,7 +110,7 @@ public class ProjectDocumentService : IProjectDocumentService
         return table;
     }
 
-    private static Table BuildStudentTable(IReadOnlyList<ProjectStudent> students)
+    private static Table BuildStudentTable(IReadOnlyList<StudentGroupMember> students)
     {
         var table = CreateTable(["No.", "Full name", "Student code", "Phone", "E-mail", "Role in Group"]);
 
@@ -122,14 +122,15 @@ public class ProjectDocumentService : IProjectDocumentService
 
         for (var i = 0; i < students.Count; i++)
         {
-            var student = students[i];
+            var member = students[i];
+            var student = member.Student;
             table.Append(CreateRow([
                 (i + 1).ToString(),
                 student.FullName,
                 student.StudentCode ?? string.Empty,
                 student.Phone ?? string.Empty,
                 student.Email ?? string.Empty,
-                student.RoleInGroup ?? string.Empty
+                member.RoleInGroup ?? string.Empty
             ]));
         }
 

@@ -2,51 +2,51 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using CapstoneRegistration.API.Data;
 using CapstoneRegistration.API.DTOs.Requests;
 using CapstoneRegistration.API.DTOs.Responses;
 using CapstoneRegistration.API.Exceptions;
 using CapstoneRegistration.API.Models;
 using CapstoneRegistration.API.Services.Interfaces;
+using CapstoneRegistration.API.UnitOfWorks;
 
 namespace CapstoneRegistration.API.Services.Implementations;
 
 public class AuthService : IAuthService
 {
-    private readonly ApplicationDbContext _db;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _config;
 
-    public AuthService(ApplicationDbContext db, IConfiguration config)
+    public AuthService(IUnitOfWork unitOfWork, IConfiguration config)
     {
-        _db = db;
+        _unitOfWork = unitOfWork;
         _config = config;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
     {
-        var exists = await _db.Users.AnyAsync(u => u.Email == request.Email.ToLower(), ct);
+        var exists = await _unitOfWork.Context.Users.AnyAsync(u => u.Email == request.Email.ToLower(), ct);
         if (exists)
             throw new BadRequestException("An account with this email already exists.");
 
         var user = new User
         {
+            Username        = request.Email.Split('@')[0].ToLower(),
             Email           = request.Email.ToLower(),
             FullName        = request.FullName,
-            Role            = "Admin",
             Password        = request.Password,
-            IsEmailVerified = false
         };
 
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync(ct);
+        await _unitOfWork.Users.AddAsync(user, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         return BuildAuthResponse(user);
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default)
     {
-        var user = await _db.Users
+        var user = await _unitOfWork.Context.Users
             .FirstOrDefaultAsync(u => u.Email == request.Email.ToLower(), ct);
 
         if (user is null || !string.Equals(request.Password, user.Password, StringComparison.Ordinal))

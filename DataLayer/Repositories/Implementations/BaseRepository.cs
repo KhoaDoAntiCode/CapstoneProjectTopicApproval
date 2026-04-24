@@ -24,20 +24,19 @@ public class BaseRepository<T, TKey> : IBaseRepository<T, TKey> where T : class
     public virtual async Task<T> AddAsync(T entity, CancellationToken ct = default)
     {
         await _dbSet.AddAsync(entity, ct);
-        await _context.SaveChangesAsync(ct);
         return entity;
     }
 
-    public virtual async Task UpdateAsync(T entity, CancellationToken ct = default)
+    public virtual Task UpdateAsync(T entity, CancellationToken ct = default)
     {
         _dbSet.Update(entity);
-        await _context.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
-    public virtual async Task DeleteAsync(T entity, CancellationToken ct = default)
+    public virtual Task DeleteAsync(T entity, CancellationToken ct = default)
     {
         _dbSet.Remove(entity);
-        await _context.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
     public virtual async Task<bool> ExistsAsync(TKey id, CancellationToken ct = default) =>
