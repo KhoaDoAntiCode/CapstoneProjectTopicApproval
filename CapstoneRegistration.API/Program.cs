@@ -73,7 +73,8 @@ app.UseSwaggerUI(options =>
     options.DocumentTitle = "Capstone Project Registration Tool";
 });
 
-app.UseHttpsRedirection();
+// HTTPS redirection is handled by Railway's edge proxy; skip it in container
+// app.UseHttpsRedirection();
 app.UseCors("DefaultCors");
 app.UseAuthentication();
 app.UseAuthorization();
