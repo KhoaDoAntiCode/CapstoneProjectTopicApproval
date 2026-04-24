@@ -63,6 +63,22 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var db = scope.ServiceProvider.GetRequiredService<CapstoneRegistration.API.Data.ApplicationDbContext>();
+    try
+    {
+        logger.LogInformation("Connecting to database...");
+        await db.Database.CanConnectAsync();
+        logger.LogInformation("Database connection established successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Failed to connect to the database.");
+    }
+}
+
 app.UseExceptionHandling();
 
 app.UseSwagger();

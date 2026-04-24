@@ -56,7 +56,10 @@ public static class ServiceCollectionExtensions
             var port     = uri.Port > 0 ? uri.Port : 5432;
             var database = uri.AbsolutePath.TrimStart('/');
 
-            return $"Host={host};Port={port};Database={database};Username={username};Password={password}";
+            var connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password}";
+            Console.WriteLine($"Database connection string: {connectionString}");
+
+            return connectionString;
         }
 
         // Fall back to appsettings.json (local development)
